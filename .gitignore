@@ -1,0 +1,16 @@
+# Compiled skill files and other transient artifacts
+*.pyc
+__pycache__/
+*.tmp
+.DS_Store
+
+# Skill files that should NOT be committed
+# (Hermes installs them via `hermes skills install <repo>` instead,
+#  or by copying the SKILL.md to ~/.hermes/skills/ manually)
+.DS_Store
+.vscode/
+.idea/
+
+# Keep SKILL.md tracked — that's the whole point of this repo.
+# (Listed below explicitly so contributors don't accidentally .gitignore it.)
+!SKILL.md
