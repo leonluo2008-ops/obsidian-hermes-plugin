@@ -1,12 +1,34 @@
 ---
 name: obsidian-hermes-plugin
 description: |
-  Install and configure the Obsidian community plugin "Hermes Agent" (by jsun2020) that connects Obsidian to a locally-running Hermes Agent gateway via the API Server endpoint. Load this skill when the user wants to chat with a local Hermes Agent from inside Obsidian, get the plugin to recognize a Hermes gateway, configure gateway URL + API key, or troubleshoot the "Cannot reach the gateway" / "Auth failed (401/403)" errors that show up in the plugin settings.
+  Install and configure the **jsun2020/hermes-agent-obsidian-plugin** (a.k.a. the
+  Obsidian community plugin whose display name is "Hermes Agent") — the plugin that
+  connects Obsidian to a locally-running Hermes Agent gateway via the API Server
+  endpoint on port 8642.
+
+  Load this skill ONLY when the user is dealing with THIS specific Obsidian plugin
+  (the one by jsun2020 that talks to Hermes Agent). DO NOT load for other Obsidian
+  plugins with similar names like "Claudian", "Obsidian Copilot", "Smart Connections",
+  or generic "Obsidian AI" / "chat with your notes" plugins — those are unrelated.
+
+  Trigger phrases (Chinese + English):
+  - 安装 Obsidian Hermes 插件 / jsun2020 插件 / 装一下 Obsidian 的 Hermes 插件
+  - 配置 Obsidian Hermes 插件 / Obsidian 连不上 Hermes / Obsidian 报 401
+  - Obsidian plugin jsun2020 / jsun2020 Obsidian / jsun2020/hermes-agent-obsidian-plugin
+  - Install Obsidian Hermes Agent plugin / jsun2020 obsidian plugin
+  - Obsidian plugin "Cannot reach the gateway" / "Auth failed (401/403)" (specifically
+    with the Hermes Agent plugin's settings panel)
+
+  DO NOT trigger on:
+  - "Obsidian plugin install" (generic)
+  - "Obsidian AI plugin" / "Obsidian Copilot" / "Claudian"
+  - "Chat with your notes" plugins (Smart Connections, etc.)
+  - The Hermes Agent Desktop app itself (that's just `hermes desktop`, no Obsidian)
 version: 1.0.0
 platforms: [linux, macos, windows]
 metadata:
   hermes:
-    tags: obsidian, plugin, brfat, gateway, api-server, productivity
+    tags: obsidian, plugin, brfat, gateway, api-server, productivity, jsun2020
     category: productivity
     related_skills: [obsidian, hermes-agent]
 ---

@@ -1,74 +1,94 @@
 # obsidian-hermes-plugin
 
-A [Hermes Agent](https://github.com/NousResearch/hermes-agent) **skill** that installs and configures
-the [jsun2020/hermes-agent-obsidian-plugin](https://github.com/jsun2020/hermes-agent-obsidian-plugin)
-for Obsidian, bridging Obsidian to a locally-running Hermes gateway via the gateway's
-OpenAI-compatible API Server.
+一个 [Hermes Agent](https://github.com/NousResearch/hermes-agent) **skill** —— 用于安装和配置
+[jsun2020/hermes-agent-obsidian-plugin](https://github.com/jsun2020/hermes-agent-obsidian-plugin)
+这款 Obsidian 社区插件,让 Obsidian 通过 gateway 的 OpenAI 兼容 API Server
+(:8642) 与本地 Hermes Agent 联动。
 
-**Hermes Agent skill**: [`productivity/obsidian-hermes-plugin/SKILL.md`](./SKILL.md)
-(15.3 KB · 380 lines)
+**本仓库只包含 skill 文件**:`[productivity/obsidian-hermes-plugin/SKILL.md](./SKILL.md)`
+(15.9 KB · 410 行)
 
-## What it does
+## 这是什么
 
-This skill is a **single-file, drop-in procedure** for Hermes Agent that captures
-the proven end-to-end bring-up flow:
+这个 skill 是一份 **单文件、可直接使用的 Hermes Agent 操作流程**,记录了经过
+实测的端到端接通流程:
 
-1. **Enable the gateway's API Server** (`API_SERVER_ENABLED=true`, `API_SERVER_KEY=...`)
-2. **Restart the gateway** (systemd-aware, with the SIGTERM propagation guard)
-3. **Verify port 8642** is actually listening (`/health`, `/v1/models`, journalctl)
-4. **Install the Obsidian plugin** (via [BRAT](https://github.com/TfTHacker/obsidian42-brat) — recommended)
-5. **Configure the plugin** (baseUrl, API key, transport, working folder)
-6. **Verify with a real chat message**
+1. **启用 gateway 的 API Server**(`API_SERVER_ENABLED=true`、`API_SERVER_KEY=...`)
+2. **重启 gateway**(systemd 场景,绕开 SIGTERM 自我传播守卫)
+3. **验证 :8642 真的在监听**(`/health`、`/v1/models`、journalctl)
+4. **安装 Obsidian 插件**(推荐走 [BRAT](https://github.com/TfTHacker/obsidian42-brat))
+5. **配置插件**(baseUrl、API key、transport、working folder)
+6. **用真实对话验证**
 
-Plus a dedicated **Troubleshooting** section covering the 6 problems the plugin's
-own README does not handle:
+外加一份专门的 **Troubleshooting** 段,涵盖插件自身 README 没处理的 6 类问题:
 
 - `Cannot reach the gateway`
 - `Auth failed (401/403)`
-- Codex sandbox blocking vault file reads (`workspace-write` config + Windows
-  `CreateProcessWithLogonW 1385` corporate-lockdown fallback)
-- Wrong port for named profiles
-- Empty `/v1/models` on older gateways
-- Empty real-model-id in the chat footer (Hermes home path)
+- Codex 沙箱拒绝读 vault 文件(`workspace-write` 配置 +
+  Windows `CreateProcessWithLogonW 1385` 企业锁机的 fallback)
+- 多 profile 时端口错配
+- 老 gateway 上 `/v1/models` 返回空
+- chat footer 显示真实 model id 为空(Hermes home 路径)
 
-## Install
+## 安装
 
-Drop the SKILL.md into your Hermes Agent skills directory:
+把 `SKILL.md` 放到你的 Hermes Agent skills 目录:
 
 ```bash
 # Linux / macOS / WSL
 mkdir -p ~/.hermes/skills/productivity/obsidian-hermes-plugin
 curl -fsSL https://raw.githubusercontent.com/leonluo2008-ops/obsidian-hermes-plugin/main/SKILL.md \
   -o ~/.hermes/skills/productivity/obsidian-hermes-plugin/SKILL.md
+```
 
-# Or via Hermes CLI (if you prefer the registry path)
+或者通过 Hermes CLI(走 registry 路径):
+
+```bash
 hermes skills install https://github.com/leonluo2008-ops/obsidian-hermes-plugin
 ```
 
-Then **restart your Hermes session** (or run `/reload-skills` in-session) so the
-new skill loads.
+然后 **重启 Hermes 会话**(或在 session 里跑 `/reload-skills`),让新 skill 加载。
 
-## Use
+## 触发词(避免误触发)
 
-Once loaded, trigger phrases like:
+Hermes 的 skill 触发基于 description 匹配。**Obsidian 社区里有大量类似插件**
+(Claudian、Obsidian Copilot、Smart Connections 等),如果只用 "Obsidian plugin" 这种
+通用词触发,会跟那些插件冲突。
 
-- *"Install the Obsidian Hermes plugin"*
-- *"Connect my Obsidian to Hermes"*
-- *"Obsidian plugin 401 unauthorized"*
-- *"Fix the Cannot reach the gateway error in Obsidian"*
+本 skill 的 description 明确写了 **只在用户明确提到 jsun2020/hermes-agent-obsidian-plugin
+或 Hermes Agent plugin** 时才加载。**触发词**:
 
-…will surface this skill and run through the bring-up checklist.
+- 安装 Obsidian Hermes 插件
+- jsun2020 插件 / 装一下 Obsidian 的 Hermes 插件
+- 配置 Obsidian Hermes 插件
+- Obsidian 连不上 Hermes / Obsidian 报 401
+- Obsidian plugin jsun2020 / jsun2020/hermes-agent-obsidian-plugin
+- Install Obsidian Hermes Agent plugin
 
-## What this skill is NOT
+**不会触发**(避免误加载):
 
-- **Not** a Hermes plugin itself — it's a `SKILL.md` (procedural knowledge) for
-  the Hermes agent.
-- **Not** the Obsidian plugin — that's
-  [jsun2020/hermes-agent-obsidian-plugin](https://github.com/jsun2020/hermes-agent-obsidian-plugin).
-- **Not** a fork of Hermes Agent — it only depends on the gateway's
-  `API_SERVER_*` env vars, which Hermes ships in v0.18.2+.
+- "Obsidian plugin install"(太通用)
+- "Obsidian AI plugin" / "Obsidian Copilot" / "Claudian"(别的插件)
+- "Chat with your notes" 类插件(Smart Connections 等)
+- Hermes Agent Desktop app 本体(那只是 `hermes desktop`,跟 Obsidian 无关)
 
-## Architecture
+## 使用
+
+加载本 skill 后,说下面任何一句都会触发并执行 6 步接通流程:
+
+- "装一下 Obsidian 的 Hermes 插件"
+- "Obsidian 报 Cannot reach the gateway"
+- "我的 Obsidian plugin 401 unauthorized"
+- "配置 jsun2020 Obsidian 插件"
+- "Install Obsidian Hermes Agent plugin"
+
+## 这不是
+
+- **不是** Hermes plugin 本身 —— 它是给 Hermes agent 用的 `SKILL.md`(流程性知识)
+- **不是** Obsidian 插件本体 —— 那是 [jsun2020/hermes-agent-obsidian-plugin](https://github.com/jsun2020/hermes-agent-obsidian-plugin)
+- **不是** Hermes Agent 的 fork —— 只依赖 gateway 的 `API_SERVER_*` 环境变量(Hermes v0.18.2+ 自带)
+
+## 架构
 
 ```
 ┌─────────────────┐                    ┌──────────────────────┐
@@ -76,33 +96,33 @@ Once loaded, trigger phrases like:
 │ + Hermes Agent  │   /v1/runs        │  gateway (systemd)   │
 │   plugin        │   /v1/models      │                      │
 │                 │   127.0.0.1:8642  │  + API Server        │
-│   (sidebar)     │  Bearer <KEY>     │    (when enabled)    │
+│   (sidebar)     │  Bearer <KEY>     │    (启用时)           │
 └─────────────────┘ ──────────────────▶└──────────────────────┘
 ```
 
-The plugin's "Runs" transport (`POST /v1/runs` + `GET /v1/runs/{id}/events`) is
-preferred when `/v1/capabilities` advertises it; OpenAI-compatible
-`/v1/chat/completions` is the fallback. Hermes Agent gateway supports both.
+插件优先用 "Runs" transport(`POST /v1/runs` + `GET /v1/runs/{id}/events`,前提是
+`/v1/capabilities` 通告支持);fallback 到 OpenAI 兼容的 `/v1/chat/completions`。
+Hermes Agent gateway 两个都支持。
 
-## Verified on
+## 验证环境
 
-| Component | Version | Date |
+| 组件 | 版本 | 日期 |
 |---|---|---|
-| Zbook host | Windows 11 + WSL2 Ubuntu 24.04 | 2026-07-16 |
+| Zbook 主机 | Windows 11 + WSL2 Ubuntu 24.04 | 2026-07-16 |
 | Hermes Agent | v0.18.2 (commit `f556edc1`) | 2026-07-16 |
 | Obsidian | 1.7+ | 2026-07-16 |
-| Obsidian plugin (target) | v0.9.1 | 2026-07-16 |
-| Obsidian plugin repo | [jsun2020/hermes-agent-obsidian-plugin](https://github.com/jsun2020/hermes-agent-obsidian-plugin) | latest at install time |
+| Obsidian 插件(目标) | v0.9.1 | 2026-07-16 |
+| Obsidian 插件仓库 | [jsun2020/hermes-agent-obsidian-plugin](https://github.com/jsun2020/hermes-agent-obsidian-plugin) | 安装时取最新 |
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT —— 见 [LICENSE](./LICENSE)。
 
-## Related
+## 相关链接
 
-- [jsun2020/hermes-agent-obsidian-plugin](https://github.com/jsun2020/hermes-agent-obsidian-plugin) —
-  the Obsidian plugin this skill installs
-- [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) —
-  the agent whose gateway this skill connects to
-- [obsidian42-brat](https://github.com/TfTHacker/obsidian42-brat) —
-  recommended way to install the plugin from a GitHub URL
+- [jsun2020/hermes-agent-obsidian-plugin](https://github.com/jsun2020/hermes-agent-obsidian-plugin) ——
+  本 skill 要装的插件本体
+- [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) ——
+  本 skill 要连接的 gateway 来源
+- [obsidian42-brat](https://github.com/TfTHacker/obsidian42-brat) ——
+  从 GitHub 装插件的推荐方式
